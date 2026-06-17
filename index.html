@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Chat App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(0, 255, 255, 0.18), transparent 30%),
+        linear-gradient(180deg, #02131a 0%, #05232d 48%, #031018 100%);
+      color: #d8ffff;
+    }
+
+    .header {
+      background: linear-gradient(90deg, #03242d, #063845, #03242d);
+      color: #67f6ff;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      border-bottom: 1px solid rgba(103, 246, 255, 0.25);
+      letter-spacing: 1px;
+    }
+
+    #login-section {
+      background: rgba(3, 30, 38, 0.92);
+      border: 1px solid rgba(103, 246, 255, 0.25);
+      padding: 20px;
+      margin: 40px auto;
+      border-radius: 14px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 24px rgba(0, 255, 255, 0.08);
+    }
+
+    #login-section h2 {
+      color: #67f6ff;
+      margin-bottom: 15px;
+    }
+
+    #login-section input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(103, 246, 255, 0.25);
+      background: rgba(2, 22, 28, 0.95);
+      color: #d8ffff;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #login-section input::placeholder {
+      color: rgba(216, 255, 255, 0.55);
+    }
+
+    #login-btn,
+    #leave-btn,
+    .buttons button,
+    .bottom-buttons button {
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: none;
+      transition: 0.2s ease;
+      outline: none;
+    }
+
+    #login-btn {
+      background: linear-gradient(180deg, #0aa8b7, #066775);
+      color: white;
+      width: 100%;
+    }
+
+    #leave-btn {
+      background: linear-gradient(180deg, #c83c4e, #8f2030);
+      color: white;
+      width: 100%;
+    }
+
+    #chat-section {
+      display: none;
+      width: 100%;
+    }
+
+    .top-bar {
+      background: linear-gradient(90deg, rgba(0, 255, 255, 0.18), rgba(0, 0, 0, 0.28));
+      color: #67f6ff;
+      padding: 12px 10px;
+      text-align: center;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(103, 246, 255, 0.2);
+      border-bottom: 1px solid rgba(103, 246, 255, 0.2);
+      backdrop-filter: blur(6px);
+    }
+
+    .time-display {
+      font-size: 14px;
+      font-weight: normal;
+      color: #9ffcff;
+    }
+
+    .chat-title {
+      flex: 1;
+      text-align: center;
+    }
+
+    .chat-area {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .left-images {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      width: 110px;
+    }
+
+    .left-images img {
+      width: 86px;
+      height: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(103, 246, 255, 0.18);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.07);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    .right-image {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid #67f6ff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .picogram-image {
+      width: 100px;
+      height: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(103, 246, 255, 0.18);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.07);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .messages-box {
+      background: rgba(2, 20, 26, 0.92);
+      border: 1px solid rgba(103, 246, 255, 0.16);
+      padding: 12px;
+      min-height: 320px;
+      max-height: 430px;
+      overflow-y: auto;
+      border-radius: 16px;
+      width: 100%;
+      margin: 0 6px;
+      backdrop-filter: blur(4px);
+    }
+
+    .messages-box .message-mine,
+    .messages-box .message-other {
+      margin: 8px 0;
+      padding: 9px 11px;
+      border-radius: 12px;
+      font-size: 14px;
+      max-width: 70%;
+      clear: both;
+      overflow-wrap: break-word;
+    }
+
+    .messages-box .message-mine {
+      background: linear-gradient(180deg, #10a9b8, #0a7080);
+      color: white;
+      float: right;
+      text-align: right;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .messages-box .message-other {
+      background: rgba(255, 255, 255, 0.95);
+      color: #08303a;
+      float: left;
+      text-align: left;
+      border: 1px solid rgba(103, 246, 255, 0.18);
+    }
+
+    .message-author {
+      font-weight: bold;
+      font-size: 12px;
+      margin-bottom: 3px;
+      display: block;
+      color: inherit;
+    }
+
+    .input-area {
+      background: rgba(3, 28, 35, 0.92);
+      border-top: 1px solid rgba(103, 246, 255, 0.15);
+      padding: 10px;
+      border-radius: 16px;
+      margin: 10px;
+    }
+
+    #message-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(103, 246, 255, 0.22);
+      background: rgba(2, 22, 28, 0.98);
+      color: #d8ffff;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-bottom: 8px;
+      outline: none;
+    }
+
+    #message-input::placeholder {
+      color: rgba(216, 255, 255, 0.55);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .buttons button {
+      background: linear-gradient(180deg, #0aa8b7, #066775);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+
+    .buttons button:active,
+    .bottom-buttons button:active,
+    #login-btn:active,
+    #leave-btn:active {
+      transform: scale(0.98);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .file-label {
+      background: linear-gradient(180deg, #19c37d, #0d8a54);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-block;
+      border: none;
+    }
+
+    .bottom-area {
+      background: rgba(3, 28, 35, 0.92);
+      border: 1px solid rgba(103, 246, 255, 0.16);
+      border-radius: 16px;
+      margin: 10px;
+      padding: 10px;
+      backdrop-filter: blur(4px);
+    }
+
+    .bottom-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #67f6ff;
+    }
+
+    .user-list-bottom {
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .user-list-bottom span {
+      display: inline-block;
+      margin: 3px 5px;
+      padding: 4px 8px;
+      background: #0d6070;
+      color: white;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid rgba(103, 246, 255, 0.18);
+    }
+
+    .user-list-bottom span.active {
+      background: #67f6ff;
+      color: #03242d;
+    }
+
+    .bottom-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .bottom-buttons button {
+      background: linear-gradient(180deg, #0aa8b7, #066775);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+
+    .bottom-buttons button.active {
+      background: #67f6ff;
+      color: #03242d;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .chat-area {
+        flex-direction: column;
+      }
+
+      .left-images,
+      .right-panel {
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .messages-box {
+        margin: 0;
+        min-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">My Chat App</div>
+
+  <div id="login-section">
+    <h2>Sign In</h2>
+
+    <div style="margin-bottom: 10px; color:#9ffcff;">
+      <label>
+        <input type="radio" name="login-type" value="phone" checked>
+        Phone Number
+      </label>
+      <label style="margin-left: 10px;">
+        <input type="radio" name="login-type" value="email">
+        Email ID
+      </label>
+    </div>
+
+    <input type="text" id="phone-number" placeholder="Your phone number">
+    <input type="email" id="email-id" placeholder="Your email ID" style="display:none;">
+    <input type="text" id="user-name" placeholder="Your username">
+    <input type="color" id="user-color" value="#0aa8b7">
+    <button id="login-btn">Sign In</button>
+  </div>
+
+  <div id="leave-section" style="display:none; text-align:center; margin: 20px;">
+    <h3 style="color:#67f6ff; margin-bottom: 10px;">You are already logged in</h3>
+    <button id="leave-btn">Leave the App (Sign Out)</button>
+  </div>
+
+  <div id="chat-section">
+    <div class="top-bar">
+      <div class="chat-title" id="chat-title">Group Chat</div>
+      <div class="time-display" id="time-display"></div>
+    </div>
+
+    <div class="chat-area">
+      <div class="left-images">
+        <img src="sun.png" alt="Sun">
+        <img src="sunrise.png" alt="Sunrise">
+        <img src="sunset.png" alt="Sunset">
+        <img src="brave_olivine_transparent.png" alt="Brave Olivine">
+      </div>
+
+      <div class="messages-box" id="messages"></div>
+
+      <div class="right-panel">
+        <img class="right-image" src="jarvis_transparent.gif" alt="Jarvis">
+        <img class="picogram-image" src="picogram.gif" alt="Picogram">
+      </div>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="message-input" placeholder="Type a message">
+      <div class="buttons">
+        <button id="send-btn">Send</button>
+        <button id="voice-btn">Voice</button>
+        <label class="file-label">
+          File
+          <input type="file" id="file-input">
+        </label>
+        <button id="upload-btn">Upload</button>
+      </div>
+    </div>
+
+    <div class="bottom-area">
+      <div class="bottom-title">Users</div>
+      <div class="user-list-bottom" id="user-list-bottom"></div>
+      <div class="bottom-buttons">
+        <button id="group-btn">Group</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
